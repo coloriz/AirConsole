@@ -31,7 +31,7 @@ class Controller extends BaseController {
             sessionId
         }
 
-        this._javaObject = new JavaObject(path.join(Controller.serializable_path, `${this._spec.firmware}.json`));
+        this._javaObject = new JavaObject(path.join(__dirname, Controller.serializable_path, `${this._spec.firmware}.json`));
     }
 
     _makeRequest(indoor = []) {
