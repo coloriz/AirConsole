@@ -9,12 +9,9 @@ async function eunju_test() {
         sessionId: 'samsung.http.server0.34035795566805793'
     })
     let status = await eunju.readAll().then(v => v).catch(e => {throw e});
-    // console.log(Object.keys(status));
-    // console.log(status.indoorTable);
     console.log(status);
     
-    // let res = await eunju.update('03.00.00', {power: 'off', temperature: 18, windPower: 'high', windUpDown: 'true', windLeftRight: 'true', operationMode: 'cool'}).then(v => v).catch(e => {throw e;})
-    // console.log(res)
+    await eunju.update('00.00.00', {power: 'off', temperature: 18, windPower: 'high', windUpDown: 'true', windLeftRight: 'true', operationMode: 'cool'}).then(v => v).catch(e => {throw e;})
 }
 
 async function bukak_test() {
@@ -26,12 +23,10 @@ async function bukak_test() {
         sessionId: null
     })
     // let status = await bukak.readAll().then(v => v).catch(e => {throw e});
-    // console.log(Object.keys(status));
-    // console.log(status.indoorTable);
-    
-    bukak.update('00.05.02', {power: 'on', temperature: 18, windPower: 'high', windUpDown: 'true', windLeftRight: 'true', operationMode: 'cool'})
+    // console.log(status);
 
+    bukak.update('00.00.00', {power: 'off', temperature: 20, windPower: 'high', windUpDown: 'false', windLeftRight: 'false', operationMode: 'cool'})
 }
 
-// eunju_test()
+eunju_test()
 bukak_test()

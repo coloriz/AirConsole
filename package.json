@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "java.io": "^2.3.0"
+    "java.io": "^2.3.0",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {},
   "scripts": {

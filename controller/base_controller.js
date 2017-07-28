@@ -1,4 +1,6 @@
 const net = require('net');
+
+const uuidv4 = require('uuid/v4');
 const JavaObject = require('./java_object');
 
 class BaseController {
@@ -42,15 +44,23 @@ class BaseController {
 
             // request
             socket.write(serializedRequest);
+            
+            if(!socket.uuid) {
+                socket.uuid = uuidv4();
+            }
 
         });
 
-        this.bufferPool[socket] = [];
+        if(!socket.uuid) {
+            socket.uuid = uuidv4();
+        }
+        
+        this.bufferPool[socket.uuid] = [];
 
         socket.on('data', data => {
 
-            this.bufferPool[socket].push(data);
-            let fullBuffer = Buffer.concat(this.bufferPool[socket]);
+            this.bufferPool[socket.uuid].push(data);
+            let fullBuffer = Buffer.concat(this.bufferPool[socket.uuid]);
 
             try {
 
@@ -71,41 +81,8 @@ class BaseController {
 
         socket.on('close', () => {
 
-            delete this.bufferPool[socket];
+            delete this.bufferPool[socket.uuid];
         });
-    }
-
-    sendAndDiscardResponse(request) {
-
-        let socket = net.createConnection({host: this.ip, port: this.port}, () => {
-
-            let serializedRequest = JavaObject.serialize(request);
-
-
-            if('sessionId' in request.$) {
-                
-                let sessionAuthorizeRequest = this._makeRequest();
-                sessionAuthorizeRequest.$.functionType = 4;
-                sessionAuthorizeRequest.$.sessionId = request.$.sessionId;
-
-                let serialized_sessionAuthorizedRequest = JavaObject.serialize(sessionAuthorizeRequest);
-
-                // sessionAuthorize
-                socket.write(serialized_sessionAuthorizedRequest);
-                // stream reset packet
-                let reset_packet = new Buffer([0x79]); 
-                socket.write(reset_packet);
-
-                serializedRequest = serializedRequest.slice(4);
-            }
-
-            // request
-            socket.write(serializedRequest, () => {
-                console.log('done')
-                socket.destroy();
-            });
-        });
-
     }
 }
 
