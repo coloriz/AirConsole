@@ -22,7 +22,15 @@ class Response {
                 remoconEnable: detail._sRemoconEnable,
                 name: indoor._sIndoorName
             };
-        });
+        }).sort(function(a, b) {
+            if(a.address > b.address) {
+                return 1;
+            } else if (a.address < b.address) {
+                return -1;
+            } else {
+                return 0;
+            }
+        })
     }
 }
 

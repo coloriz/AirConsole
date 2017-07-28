@@ -89,7 +89,7 @@ class Controller extends BaseController {
 
         let field = request.$;
         field.power = power;
-        field.temperature = temperature;
+        field.demandTemperature = temperature;
         field.windPower = fanSpeed;
         field.windUpDown = airSwingUD;
         field.windLeftRight = airSwingLR;
