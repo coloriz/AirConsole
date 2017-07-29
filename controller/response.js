@@ -1,37 +1,31 @@
 
 class Response {
-    
-    static parse({indoorTable}) {
-        delete indoorTable.loadFactor;
-        delete indoorTable.threshold;
+	
+	static parse({indoorTable}) {
+		delete indoorTable.loadFactor;
+		delete indoorTable.threshold;
 
-        return Object.keys(indoorTable).map( addr => {
+		return Object.keys(indoorTable).map( addr => {
 
-            let indoor = indoorTable[addr];
-            let detail = indoor._detailIndoor;
+			let indoor = indoorTable[addr];
+			let detail = indoor._detailIndoor;
 
-            return {
-                address: detail._sAddr,
-                roomTemp: detail._iRoomTemp,
-                setTemp: detail._iSetTemp,
-                airSwingLR: detail._sAirSwing_LR,
-                airSwingUD: detail._sAirSwing_UD,
-                fanSpeed: detail._sFanSpeed,
-                operationMode: detail._sOperationMode,
-                power: detail._sPower,
-                remoconEnable: detail._sRemoconEnable,
-                name: indoor._sIndoorName
-            };
-        }).sort(function(a, b) {
-            if(a.address > b.address) {
-                return 1;
-            } else if (a.address < b.address) {
-                return -1;
-            } else {
-                return 0;
-            }
-        })
-    }
+			return {
+				address: detail._sAddr,
+				roomTemp: detail._iRoomTemp,
+				setTemp: detail._iSetTemp,
+				airSwingLR: detail._sAirSwing_LR,
+				airSwingUD: detail._sAirSwing_UD,
+				fanSpeed: detail._sFanSpeed,
+				operationMode: detail._sOperationMode,
+				power: detail._sPower,
+				remoconEnable: detail._sRemoconEnable,
+				name: indoor._sIndoorName
+			};
+		}).sort(function(a, b) {
+			return a.name.localeCompare(b.name)
+		})
+	}
 }
 
 module.exports = Response;
