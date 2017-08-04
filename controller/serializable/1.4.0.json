@@ -1,0 +1,92 @@
+{
+    "$":{
+        "demandTemperature": 18,
+        "functionType": 0,
+        "controlMode": "individual",
+        "deviceType": "indoor",
+        "indoorAddress": "00.00.00",
+        "operationMode": null,
+        "power": null,
+        "remocon": "true",
+        "windLeftRight": null,
+        "windPower": null,
+        "windUpDown": null,
+        "lAddr":{
+            "$":[],
+            "$class":{
+            "name":"java.util.LinkedList",
+            "serialVersionUID":"876323262645176354",
+            "flags":3,
+            "fields":[
+            ],
+            "superClass":null
+            }
+        }
+    },
+    "$class":{
+        "name":"com.samsung.dms.web.CIndoorManagementRequest",
+        "serialVersionUID":"-827995157860435338",
+        "flags":2,
+        "fields":[
+            {
+                "type":"I",
+                "name":"demandTemperature"
+            },
+            {
+                "type":"I",
+                "name":"functionType"
+            },
+            {
+                "type":"L",
+                "name":"controlMode",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"deviceType",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"indoorAddress",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"operationMode",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"power",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"remocon",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"windLeftRight",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"windPower",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"windUpDown",
+                "classname":"Ljava/lang/String;"
+            },
+            {
+                "type":"L",
+                "name":"lAddr",
+                "classname":"Ljava/util/LinkedList;"
+            }
+    ],
+    "superClass":null
+    }
+}
