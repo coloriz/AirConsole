@@ -5,10 +5,11 @@ const JavaObject = require('./java_object');
 
 class BaseController {
 
-    constructor({ip, port}) {
+    constructor({ip, port, sessionId}) {
 
         this.ip = ip;
         this.port = port;
+        this.sessionId = sessionId;
 
         this.bufferPool = {};
     }

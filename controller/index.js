@@ -3,6 +3,8 @@ const path = require('path');
 const BaseController = require('./base_controller');
 const JavaObject = require('./java_object');
 
+const DMS2XML = require('./dms2xml');
+
 const Response = require('./response');
 
 
@@ -23,7 +25,7 @@ class Controller extends BaseController {
     constructor({name, ip, port = 1901, firmware, sessionId}) {
 
         // Request 초기화
-        super({ip, port})
+        super({ip, port, sessionId})
 
         this._spec = {
             name,
@@ -31,10 +33,20 @@ class Controller extends BaseController {
             sessionId
         }
 
-        this._javaObject = new JavaObject(path.join(__dirname, Controller.serializable_path, `${this._spec.firmware}.json`));
+        let majorVersion = parseInt(firmware[0]);
+        this.majorVersion = majorVersion;
+        switch(majorVersion) {
+            case 1:
+                this._javaObject = new JavaObject(path.join(__dirname, Controller.serializable_path, `${this._spec.firmware}.json`));
+                break;
+            case 2:
+                break;
+            default:
+                throw `unsupported dms version: ${majorVersion}`
+        }
     }
 
-    _makeRequest(indoor = []) {
+    _makeDMSv1Request(indoor = []) {
 
         let request = this._javaObject.clone();
 
@@ -49,9 +61,8 @@ class Controller extends BaseController {
         return request;
     }
 
-    readAll() {
-
-        let request = this._makeRequest();
+    readDMS1() {
+        let request = this._makeDMSv1Request();
 
         // READ
         request.$.functionType = 0;
@@ -72,12 +83,32 @@ class Controller extends BaseController {
                 }
             })
         });
-
     }
 
-    update(lAddr, {power, temperature, fanSpeed, airSwingUD, airSwingLR, operationMode}) {
+    _makeDMSv2Request() {
+        return new DMS2XML(this.ip, this.port, this.sessionId);
+    }
 
-        let request = this._makeRequest(lAddr);
+    readDMS2() {
+        let request = this._makeDMSv2Request()
+        return request.readAll()
+    }
+
+    readAll() {
+
+        switch(this.majorVersion) {
+            case 1:
+                return this.readDMS1();
+            case 2:
+                return this.readDMS2();
+            default:
+                throw `Unsupported DMS Version: ${majorVersion}`;
+        }
+    }
+
+    updateDMSv1(lAddr, {power, temperature, fanSpeed, airSwingUD, airSwingLR, operationMode}) {
+
+        let request = this._makeDMSv1Request(lAddr);
 
         // WRITE
         request.$.functionType = 1;
@@ -104,6 +135,22 @@ class Controller extends BaseController {
                 // resolve(response);
             }
         })
+    }
+
+    updateDMSv2(lAddr, options) {
+        let request = this._makeDMSv2Request()
+        return request.update(lAddr, options)
+    }
+
+    update(lAddr, options) {
+        switch(this.majorVersion) {
+            case 1:
+                return this.updateDMSv1(lAddr, options);
+            case 2:
+                return this.updateDMSv2(lAddr, options);
+            default:
+                throw `Unsupported DMS Version: ${majorVersion}`;
+        }
     }
 }
 
