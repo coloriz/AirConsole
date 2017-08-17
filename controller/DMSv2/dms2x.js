@@ -4,22 +4,24 @@ const http = require('http');
 const uuidv4 = require('uuid/v4');
 const xml2js = require('xml2js');
 
-class DMS2XML {
-    constructor(host, port = 1901, sessionId) {
+class DMS2X {
+    constructor(host, port, sessionId) {
         this.host = host;
         this.port = port;
         this.sessionId = sessionId;
+    }
 
+    __init() {
         let root = xmlbuilder.create('root');
         root.att('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
         root.att('xsi:noNamespaceSchemaLocation', './xml/schema/login.xsd');
         
         root.ele('header', {sa: 'web', da: 'dms', messageType: 'request', dvmControlMode: 'individual'})
         
-        this.root = root;
+        return root;
     }
 
-    _request(host, port = 1901, data) {
+    __request(host, port, data) {
 
         let options = {
             host: host,
@@ -29,7 +31,7 @@ class DMS2XML {
             headers: {
                 'Content-Type': 'text/xml',
                 'Content-Length': Buffer.byteLength(data),
-                'Cookie': this.sessionId
+                'Cookie': 'JSESSIONID=' + this.sessionId
             }
         }
 
@@ -54,16 +56,53 @@ class DMS2XML {
         })
     }
 
-    async readAll() {
-        let root = this.root;
+    async __addr_info() {
+        let root = this.__init();
 
-        let xml = root.ele('getMonitoring')
-            .ele('all')
+        let xml = root.ele('treeInfoEx').att('range', 'all');
 
-        let data = xml.end({pretty: true})
+        let data = xml.end({pretty: true});
 
         let uuid = uuidv4();
-        let response = await this._request(this.host, this.port, `${uuid}:` + data)
+        let response = await this.__request(this.host, this.port, `${uuid}:` + data);
+
+        let parser = new xml2js.Parser();
+
+        return new Promise((resolve, reject) => {
+            parser.parseString(response.substr(response.search('<root>')), function( err, result) {
+                if(err) {
+                    reject(err)
+                } else {
+                    let response_raw = result.root.treeInfoEx[0].indoorList[0].indoor;
+
+                    let addrInfo = {};
+
+                    let response = response_raw.forEach(obj => {
+                        const address = obj.$.addr;
+                        const name = obj.$.name;
+
+                        addrInfo[address] = name;
+                    })
+
+                    resolve(addrInfo);
+                }
+            })
+        })
+    }
+
+    async readAll() {
+
+        let addrInfo = await this.__addr_info();
+
+        let root = this.__init();
+
+        let xml = root.ele('getMonitoring')
+            .ele('all');
+
+        let data = xml.end({pretty: true});
+
+        let uuid = uuidv4();
+        let response = await this.__request(this.host, this.port, `${uuid}:` + data);
 
         let parser = new xml2js.Parser();
 
@@ -72,14 +111,14 @@ class DMS2XML {
                 if(err) {
                     reject(err)
                 } else {
-                    let response_raw = result.root.getMonitoring[0].all[0].indoor
+                    let response_raw = result.root.getMonitoring[0].all[0].indoor;
 
                     let response = response_raw.map(obj => {
 
                         const address = obj.$.addr
-                        let detail = obj.indoorDetail[0].$
+                        let detail = obj.indoorDetail[0].$;
 
-                        const power = detail.power
+                        const power = detail.power;
                         const roomTemp = detail.roomTemp;
                         const setTemp = detail.setTemp;
                         const airSwingLR = detail.airSwing_LR;
@@ -87,7 +126,7 @@ class DMS2XML {
                         const fanSpeed = detail.fanSpeed;
                         const operationMode = detail.opMode;
                         const remoconEnable = detail.remoconEnable;
-                        const name = detail.name || address;
+                        const name = addrInfo[address] || detail.name || address;
 
                         return {
                             address,
@@ -111,7 +150,7 @@ class DMS2XML {
 
     async update(lAddr, {power = null, temperature = null, fanSpeed = null, airSwingUD = null, airSwingLR = null, operationMode = null}) {
 
-        let root = this.root;
+        let root = this.__init();
 
         if(typeof lAddr == 'string') {
             var addrList = [lAddr]
@@ -153,8 +192,8 @@ class DMS2XML {
 
         let data = xml.end({pretty: true})
 
-        return await this._request(this.host, this.port, `${uuidv4()}:` + data)
+        return this.__request(this.host, this.port, `${uuidv4()}:` + data)
     }
 }
 
-module.exports = DMS2XML
+module.exports = DMS2X;
