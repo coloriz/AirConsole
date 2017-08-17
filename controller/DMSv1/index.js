@@ -42,7 +42,7 @@ class DMSv1 extends DMS {
 
             if('sessionId' in request.$) {
                 
-                let sessionAuthorizeRequest = this._makeDMSv1Request();
+                let sessionAuthorizeRequest = this.__make_request();
                 sessionAuthorizeRequest.$.functionType = 4;
                 sessionAuthorizeRequest.$.sessionId = request.$.sessionId;
 
