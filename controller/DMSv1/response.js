@@ -1,4 +1,3 @@
-
 class Response {
 	
 	static parse({indoorTable}) {
