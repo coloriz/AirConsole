@@ -73,7 +73,11 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules/
+## This library modified node_modules/java.io module directly
+## to add support for serializing java objects.
+## Until we figure out how to serialize java objects without directly modifying an existing module,
+## please include node_modules directory.
+# node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
@@ -152,3 +156,5 @@ dist
 .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node
+
+!node_modules/**
