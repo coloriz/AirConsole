@@ -97,6 +97,16 @@ class DMSv1 extends DMS {
             
             delete this.bufferPool[socket.uuid];
         });
+
+        socket.setTimeout(3000, () => {
+            socket.destroy();
+            delete this.bufferPool[socket.uuid];
+        })
+
+        socket.on('timeout', () => {
+            socket.destroy();
+            delete this.bufferPool[socket.uuid];
+        })
     }
 
     readAll() {

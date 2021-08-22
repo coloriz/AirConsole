@@ -16,7 +16,16 @@ class DMSv2 extends DMS {
 
     readAll() {
         let request = new DMS2X(this.host, this.port, this.sessionId);
-        return request.readAll();
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+                var response = await request.readAll();
+                resolve(response)
+            } catch (err) {
+                reject(err)
+            }
+        })
     }
 
     update(lAddr, {power, temperature, fanSpeed, airSwingUD, airSwingLR, operationMode}) {

@@ -26,6 +26,7 @@ class Controller {
     }
 
     readAll() {
+        // returns Promise
         return this.dms.readAll()
     }
 

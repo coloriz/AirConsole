@@ -49,6 +49,18 @@ class DMS2X {
                 res.on('error', (error) => {
                     reject(error)
                 })
+
+                res.setTimeout(30000, () => {
+                    reject("RESPONSE TIMEOUT ERROR");
+                })
+            })
+
+            req.setTimeout(30000, () => {
+                req.destroy()
+            })
+
+            req.on("error", error => {
+                reject(error)
             })
 
             req.write(data);
@@ -64,7 +76,11 @@ class DMS2X {
         let data = xml.end({pretty: true});
 
         let uuid = uuidv4();
-        let response = await this.__request(this.host, this.port, `${uuid}:` + data);
+        let response = await this.__request(this.host, this.port, `${uuid}:` + data)
+            .then(v => v)
+            .catch(e => {
+                throw e;
+            });
 
         let parser = new xml2js.Parser();
 
@@ -92,7 +108,11 @@ class DMS2X {
 
     async readAll() {
 
-        let addrInfo = await this.__addr_info();
+        let addrInfo = await this.__addr_info()
+            .then(v => v)
+            .catch(e => {
+                throw e;
+            });
 
         let root = this.__init();
 
@@ -102,7 +122,11 @@ class DMS2X {
         let data = xml.end({pretty: true});
 
         let uuid = uuidv4();
-        let response = await this.__request(this.host, this.port, `${uuid}:` + data);
+        let response = await this.__request(this.host, this.port, `${uuid}:` + data)
+            .then(v => v)
+            .catch(e => {
+                throw e;
+            });
 
         let parser = new xml2js.Parser();
 
@@ -193,6 +217,10 @@ class DMS2X {
         let data = xml.end({pretty: true})
 
         return this.__request(this.host, this.port, `${uuidv4()}:` + data)
+            .then(v => v)
+            .catch(e => {
+                throw e;
+            });
     }
 }
 

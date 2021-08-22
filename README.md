@@ -11,7 +11,7 @@ async function bukak_read() {
 
     let bukak = new AirConsole({
         name: '북악관',
-        ip: '210.110.32.20',
+        host: '210.110.32.20',
         port: 1901,
         firmware: '1.4.3',
         sessionId: null
@@ -34,7 +34,7 @@ async function bukak_read() {
 __new AirConsole({name, ip, port? firmware, sessionId})__
 
 - name: Name  
-- ip: DMS 서버 주소  
+- host: DMS 서버 주소  
 - port: DMS 서버 포트(default: 1901)  
 - firmware: DMS 펌웨어 버전  
 - sessionId: 세션 ID  
@@ -63,8 +63,12 @@ __AirConsole.update(lAddr, {power, temperature, fanSpeed, airSwingUD, airSwingLR
 
 ## 지원되는 펌웨어 버전
 
+- 1.4.0
+- 1.4.2
+- 1.4.2r8-T
 - 1.4.3
 - 1.4.4.11
+- 2.x.x.x
 
 ---
 
