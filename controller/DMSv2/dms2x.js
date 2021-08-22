@@ -47,20 +47,9 @@ class DMS2X {
                     resolve(buffer);
                 })
                 res.on('error', (error) => {
-                    reject(error)
+		    console.error(error)
+                    // reject(error)
                 })
-
-                res.setTimeout(30000, () => {
-                    reject("RESPONSE TIMEOUT ERROR");
-                })
-            })
-
-            req.setTimeout(30000, () => {
-                req.destroy()
-            })
-
-            req.on("error", error => {
-                reject(error)
             })
 
             req.write(data);
@@ -76,18 +65,15 @@ class DMS2X {
         let data = xml.end({pretty: true});
 
         let uuid = uuidv4();
-        let response = await this.__request(this.host, this.port, `${uuid}:` + data)
-            .then(v => v)
-            .catch(e => {
-                throw e;
-            });
+        let response = await this.__request(this.host, this.port, `${uuid}:` + data);
 
         let parser = new xml2js.Parser();
 
         return new Promise((resolve, reject) => {
             parser.parseString(response.substr(response.search('<root>')), function( err, result) {
                 if(err) {
-                    reject(err)
+		    console.error(err)
+                    // reject(err)
                 } else {
                     let response_raw = result.root.treeInfoEx[0].indoorList[0].indoor;
 
@@ -108,11 +94,7 @@ class DMS2X {
 
     async readAll() {
 
-        let addrInfo = await this.__addr_info()
-            .then(v => v)
-            .catch(e => {
-                throw e;
-            });
+        let addrInfo = await this.__addr_info();
 
         let root = this.__init();
 
@@ -122,11 +104,7 @@ class DMS2X {
         let data = xml.end({pretty: true});
 
         let uuid = uuidv4();
-        let response = await this.__request(this.host, this.port, `${uuid}:` + data)
-            .then(v => v)
-            .catch(e => {
-                throw e;
-            });
+        let response = await this.__request(this.host, this.port, `${uuid}:` + data);
 
         let parser = new xml2js.Parser();
 
@@ -217,10 +195,6 @@ class DMS2X {
         let data = xml.end({pretty: true})
 
         return this.__request(this.host, this.port, `${uuidv4()}:` + data)
-            .then(v => v)
-            .catch(e => {
-                throw e;
-            });
     }
 }
 

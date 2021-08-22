@@ -24,7 +24,7 @@ class DMSv1 extends DMS {
 
         let request = this.javaSerial.clone();
         
-        if(typeof lAddr == 'string') {
+        if (typeof lAddr == 'string') {
             request.$.lAddr.$ = [lAddr];
         } else if (lAddr instanceof Array) {
             request.$.lAddr.$ = lAddr;
@@ -36,12 +36,14 @@ class DMSv1 extends DMS {
     }
 
     __send(request, handler) {
-        let socket = net.createConnection({host: this.host, port: this.port}, () => {
-
+        console.debug(`Establishing connection with ${this.host}:${this.port}`);
+        const socket = net.createConnection({host: this.host, port: this.port, timeout: 60000}, () => {
+            console.debug(`Connected! ${this.host}:${this.port}`);
+            
             let serializedRequest = JavaObject.serialize(request);
 
-            if('sessionId' in request.$) {
-                
+            if ('sessionId' in request.$) {
+                console.debug("Authorizing session...");
                 let sessionAuthorizeRequest = this.__make_request();
                 sessionAuthorizeRequest.$.functionType = 4;
                 sessionAuthorizeRequest.$.sessionId = request.$.sessionId;
@@ -51,41 +53,36 @@ class DMSv1 extends DMS {
                 // sessionAuthorize
                 socket.write(serialized_sessionAuthorizedRequest);
                 // stream reset packet
-                let reset_packet = new Buffer([0x79]); 
+                let reset_packet = Buffer.from([0x79]); 
                 socket.write(reset_packet);
 
                 serializedRequest = serializedRequest.slice(4);
+                console.debug("Session authorized.");
             }
 
             // request
+            console.debug(`Sending a request...`);
             socket.write(serializedRequest);
-            
-            if(!socket.uuid) {
-                socket.uuid = uuidv4();
-            }
-        })
+        });
 
-        if(!socket.uuid) {
-            socket.uuid = uuidv4();
-        }
-
+        socket.uuid = uuidv4();
         this.bufferPool[socket.uuid] = [];
+
+        socket.on('timeout', () => socket.destroy(new Error('timeout')));
         
         socket.on('data', data => {
-
             this.bufferPool[socket.uuid].push(data);
-            let fullBuffer = Buffer.concat(this.bufferPool[socket.uuid]);
+            const fullBuffer = Buffer.concat(this.bufferPool[socket.uuid]);
 
             try {
-
-                let response = JavaObject.deserialize(fullBuffer);
-                if(response) {
-
+                const response = JavaObject.deserialize(fullBuffer);
+                if (response) {
                     socket.destroy();
                     handler(null, response)
                 }
             } catch (error) {
-                // console.log(error)
+                // not enough data to deserialize
+                // console.error(error)
             }
         });
 
@@ -94,25 +91,12 @@ class DMSv1 extends DMS {
         })
 
         socket.on('close', () => {
-            
             delete this.bufferPool[socket.uuid];
         });
-
-        socket.setTimeout(3000, () => {
-            socket.destroy();
-            delete this.bufferPool[socket.uuid];
-        })
-
-        socket.on('timeout', () => {
-            socket.destroy();
-            delete this.bufferPool[socket.uuid];
-        })
     }
 
     readAll() {
-
         let request = this.__make_request();
-
         // readAll
         request.$.functionType = 0;
 
@@ -123,10 +107,11 @@ class DMSv1 extends DMS {
         return new Promise((resolve, reject) => {
             this.__send(request, (err, data) => {
                 if (err) {
-                    reject(err)
+                    console.error(err);
+                    reject(err);
                 } else {
-                    let response = Response.parse(data)
-                    resolve(response)
+                    let response = Response.parse(data);
+                    resolve(response);
                 }
             })
         })
@@ -153,7 +138,8 @@ class DMSv1 extends DMS {
 
         return new Promise((resolve, reject) => {
             this.__send(request, (error, response) => {
-                if(error) {
+                if (error) {
+                    console.error(error)
                     reject(error);
                 } else {
                     resolve(response);
